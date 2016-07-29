@@ -12,6 +12,7 @@ Dir.glob('lib/**/*.rb') {|f| require_relative f}
 # Cleans list of emails (_list.csv) by looking for gibberish,
 # de-duping, and connecting to SMTP servers.
 class EmailListCleaner
+  NUM_THREADS = 4
   R_NAMESPACE = 'email_cleaner'
   R_SET_TODO  = 'unverified'
   R_SET_GOOD  = 'good'
@@ -25,48 +26,52 @@ class EmailListCleaner
 
   def run
     load_csv_into_redis_set
-    enumerate_and_verify
+    enum_and_verify
     print_stats
   end
 
   # CSV expected to have "Name", "Email address" in each row
   def load_csv_into_redis_set
     csv_arr = CSV.read('_list.csv')
-    pg = ProgressBar.create(
+    @pg = ProgressBar.create(
       title: "Load emails into Redis",
       total: csv_arr.length
     )
     csv_arr.each do |row|
       email = row[1]
       @r_named.sadd(R_SET_TODO, email)
-      pg.increment
+      @pg.increment
     end
     return @r_named.scard(R_SET_TODO)
   end
 
-  def enumerate_and_verify
-    pg = ProgressBar.create(
+  def enum_and_verify
+    @pg = ProgressBar.create(
       title: "Verifying",
       total: @r_named.scard(R_SET_TODO)
     )
     email = nil 
     while email = @r_named.spop(R_SET_TODO) do
-      success = false
-      begin
-        success = EmailVerifier.check(email)
-      rescue => e
-        pg.log "  - #{e.message}"
-      end
-      if success
-        @r_named.sadd(R_SET_GOOD, email)
-      else
-        @r_named.sadd(R_SET_BAD, email)
-      end
-      pg.increment
+      verify_email(email)
+      @pg.increment
     end
   # For ctrl-c support
   rescue SystemExit, Interrupt
     return
+  end
+
+  def verify_email(email)
+    success = false
+    begin
+      success = EmailVerifier.check(email)
+    rescue => e
+      @pg.log "  - #{e.message}"
+    end
+    if success
+      @r_named.sadd(R_SET_GOOD, email)
+    else
+      @r_named.sadd(R_SET_BAD, email)
+    end
   end
 
   def print_stats
