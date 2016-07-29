@@ -35,7 +35,7 @@ class EmailListCleaner
   def load_csv_into_redis_set
     csv_arr = CSV.read('_list.csv')
     pg = ProgressBar.create(
-      title: "Adding CSV to Redis",
+      title: "Load emails into Redis",
       total: csv_arr.length
     )
     csv_arr.each do |row|
@@ -50,10 +50,11 @@ class EmailListCleaner
       title: "Verifying",
       total: @r_named.scard(R_SET_TODO)
     )
-    while @r_named.spop(R_SET_TODO) do |email|
+    email = nil 
+    while email = @r_named.spop(R_SET_TODO) do
       success = false
       begin
-        success = EmailVerifier.check(self.email)
+        success = EmailVerifier.check(email)
       rescue => e
         pg.log "  - #{e.message}"
       end
