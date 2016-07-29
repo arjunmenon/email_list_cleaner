@@ -1,0 +1,10 @@
+*.tmproj
+dump.rdb
+.bundle
+.sass-cache
+log/*
+vendor/ruby
+system
+tmp/*
+config.yml
+_list.csv
