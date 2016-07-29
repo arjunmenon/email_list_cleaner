@@ -41,6 +41,7 @@ class EmailListCleaner
       @r_named.sadd(R_SET_TODO, email)
       pg.increment
     end
+    return @r_named.scard(R_SET_TODO)
   end
 
   def enumerate_and_verify
