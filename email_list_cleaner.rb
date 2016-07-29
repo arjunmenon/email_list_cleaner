@@ -100,5 +100,3 @@ class EmailListCleaner
   end
 
 end
-
-#EmailListCleaner.new.run
