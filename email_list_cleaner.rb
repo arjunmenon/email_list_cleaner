@@ -18,6 +18,8 @@ class EmailListCleaner
   R_SET_GOOD  = 'good'
   R_SET_BAD   = 'bad'
 
+  attr_reader :r_named
+
   def initialize
     @config = YAML::load_file('config.yml')
     config_redis
