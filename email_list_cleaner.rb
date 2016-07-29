@@ -65,7 +65,8 @@ class EmailListCleaner
     begin
       success = EmailVerifier.check(email)
     rescue => e
-      @pg.log "  - #{e.message}"
+      @pg.log "  - #{email}"
+      @pg.log "    - #{e.message}"
     end
     if success
       @r_named.sadd(R_SET_GOOD, email)
