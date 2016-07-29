@@ -26,10 +26,8 @@ class EmailListCleaner
   def run
     load_csv_into_redis_set
     enumerate_and_verify
+    print_stats
   end
-
-  # ===========================================================================
-  private
 
   # CSV expected to have "Name", "Email address" in each row
   def load_csv_into_redis_set
@@ -65,7 +63,19 @@ class EmailListCleaner
       end
       pg.increment
     end
+  # For ctrl-c support
+  rescue SystemExit, Interrupt
+    return
   end
+
+  def print_stats
+    puts "REMAINING: #{@r_named.scard(R_SET_TODO)}"
+    puts "GOOD: #{@r_named.scard(R_SET_GOOD)}"
+    puts "BAD: #{@r_named.scard(R_SET_BAD)}"
+  end
+
+  # ===========================================================================
+  private
 
   def config_redis
     r_config = {db: 1}
@@ -84,4 +94,4 @@ class EmailListCleaner
 
 end
 
-EmailListCleaner.new.run
+#EmailListCleaner.new.run
