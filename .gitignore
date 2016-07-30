@@ -8,3 +8,4 @@ system
 tmp/*
 config.yml
 _list*.csv
+proxylist.csv

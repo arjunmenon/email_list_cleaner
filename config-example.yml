@@ -8,8 +8,9 @@ redis_password: ...
 # setting this to a non-0 value
 sleep_time: 0
 # List of SOCKS5 proxy addresses...
-# Recommended to purchase from ProxyBonanza.com or other...
-# Free ones that might already be blacklisted available at:
-# - http://www.socks-proxy.net
+#
+# Free ones that might be blacklisted available at: http://www.socks-proxy.net
+#
+# Format below should be in "socks://[user:pass@]proxyhost[:port]"
 proxy_addresses:
   - "socks://localhost"

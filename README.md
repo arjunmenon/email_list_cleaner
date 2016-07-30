@@ -19,7 +19,7 @@ This program was written to clean a large list of 400k or so addresses because I
 
 My list was in the format "name", "email" ...so the program expects your `_list.csv` to follow suit.
 
-Check the `scripts` folder for easy to run examples.
+Check the `scripts` folder for easy to run examples. It's meant for consumption by Ruby devs that know what they're doing. "It worked on my machine", but you might run into issues.
 
 
 ### VERY IMPORTANT - Please note…

@@ -3,6 +3,7 @@ require "rubygems"
 require "bundler/setup"
 require "yaml"
 require "csv"
+require "fileutils"
 require "singleton"
 Bundler.require(:default)
 
@@ -21,21 +22,26 @@ class EmailListCleaner
   R_SET_GOOD   = "good"
   R_SET_BAD    = "bad"
 
-  attr_reader :r_named, :config
+  # ruby-progressbar format
+  # https://github.com/jfelchner/ruby-progressbar/wiki/Formatting
+  PROGRESS_FORMAT = "%t [%c/%C] %w"
+
+  attr_reader :r_named, :config, :proxy_list, :pg
 
   def initialize
     @config = YAML::load_file("config.yml")
+    @sleep_time = @config["sleep_time"].to_i
     config_redis
     config_email_verifier
+    config_proxy_list
   end
 
-  # If proxy_addresses defined in config.yml, this provides
+  # If proxy_addresses defined in proxylist.csv or config.yml, this provides
   # random proxy in that list to Net::SMTP"s method that fetches a
   # TCPConnection.
   def random_proxy
-    c = @config["proxy_addresses"]
-    return nil unless c.kind_of?(Array) && c.length > 0
-    return c.sample
+    return nil unless @proxy_list.length > 0
+    return @proxy_list.sample
   end
 
   def run
@@ -50,6 +56,7 @@ class EmailListCleaner
     csv_arr = CSV.read("_list.csv")
     @pg = ProgressBar.create(
       title: "Load into Redis",
+      format: PROGRESS_FORMAT,
       total: csv_arr.length
     )
     csv_arr.each do |row|
@@ -62,9 +69,11 @@ class EmailListCleaner
 
   # Writes CSV files based on our current redis sets.
   def dump_csv_files
-    write_csv_file(R_SET_TODO, "_list_todo.csv")
-    write_csv_file(R_SET_GOOD, "_list_good.csv")
-    write_csv_file(R_SET_BAD,  "_list_bad.csv")
+    FileUtils.mkdir_p('tmp')
+    write_csv_file(R_SET_TODO, "tmp/_list_todo.csv")
+    write_csv_file(R_SET_GOOD, "tmp/_list_good.csv")
+    write_csv_file(R_SET_BAD,  "tmp/_list_bad.csv")
+    puts "CSV files written to 'tmp' directory."
   end
 
   def write_csv_file(redis_key, file_name)
@@ -75,13 +84,15 @@ class EmailListCleaner
   end
 
   def enum_and_verify
+    puts "Verifying..."
     @pg = ProgressBar.create(
       title: "Verifying",
+      format: PROGRESS_FORMAT,
       total: @r_named.scard(R_SET_TODO)
     )
     email = nil 
     while email = @r_named.spop(R_SET_TODO) do
-      sleep @config["sleep_time"]
+      sleep @sleep_time
       verify_email(email)
       @pg.increment
     end
@@ -91,12 +102,12 @@ class EmailListCleaner
   end
 
   def verify_email(email)
+    @pg.log "\n= #{email}"
     success = false
     begin
       success = EmailVerifier.check(email)
     rescue => e
-      @pg.log "  = #{email}"
-      @pg.log "    - #{e.message}"
+      @pg.log "  (!) #{e.message}"
     end
     if success
       @r_named.sadd(R_SET_GOOD, email)
@@ -127,6 +138,10 @@ class EmailListCleaner
     EmailVerifier.config do |c|
       c.verifier_email = @config["from_email_address"]
     end
+  end
+
+  def config_proxy_list
+    @proxy_list = @config["proxy_addresses"] || []
   end
 
 end
