@@ -7,4 +7,4 @@ vendor/ruby
 system
 tmp/*
 config.yml
-_list.csv
+_list*.csv

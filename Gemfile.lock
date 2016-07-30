@@ -5,6 +5,7 @@ GEM
     dnsruby (1.59.3)
     email_verifier (0.1.0)
       dnsruby (>= 1.5)
+    proxifier (1.0.3)
     redis (3.3.1)
     redis-namespace (1.5.2)
       redis (~> 3.0, >= 3.0.4)
@@ -16,6 +17,7 @@ PLATFORMS
 DEPENDENCIES
   daemon-spawn
   email_verifier
+  proxifier
   redis
   redis-namespace
   ruby-progressbar

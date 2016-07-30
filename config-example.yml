@@ -1,2 +1,15 @@
-from_email_address: webmaster@somewhere.com
-redis_password:
+# Your email address. SMTP servers need this.
+# I recommend webmaster@yourdomain.com
+from_email_address: ...
+# If you have a password set on your Redis installation
+# (AND YOU SHOULD), set it here to connect
+redis_password: ...
+# If you're not using proxy_servers I STRONGLY SUGGEST
+# setting this to a non-0 value
+sleep_time: 0
+# List of SOCKS5 proxy addresses...
+# Recommended to purchase from ProxyBonanza.com or other...
+# Free ones that might already be blacklisted available at:
+# - http://www.socks-proxy.net
+proxy_addresses:
+  - "socks://localhost"
