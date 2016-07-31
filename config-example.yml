@@ -1,3 +1,5 @@
+# Fill this with your own values, save as config.yml
+
 # Your email address. SMTP servers need this.
 # I recommend webmaster@yourdomain.com
 from_email_address: ...
@@ -6,7 +8,7 @@ from_email_address: ...
 redis_password: ...
 # If you're not using proxy_servers I STRONGLY SUGGEST
 # setting this to a non-0 value
-sleep_time: 0
+sleep_time: 1
 # List of SOCKS5 proxy addresses...
 #
 # Free ones that might be blacklisted available at: http://www.socks-proxy.net
