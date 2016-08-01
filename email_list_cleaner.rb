@@ -44,6 +44,21 @@ class EmailListCleaner
     return @proxy_list.sample
   end
 
+  def next_proxy
+    return nil unless @proxy_list.length > 0
+    return @proxy_list[next_proxy_counter]
+  end
+  def next_proxy_counter
+    @next_proxy_counter ||= 0
+    max = @proxy_list.length-1
+    if @next_proxy_counter >= max
+      @next_proxy_counter = 0
+    else
+      @next_proxy_counter += 1
+    end
+    return @next_proxy_counter 
+  end
+
   def run
     load_csv_into_redis_set
     enum_and_verify
@@ -145,3 +160,6 @@ class EmailListCleaner
   end
 
 end
+
+# For quick irb reference
+ELC = EmailListCleaner.instance
