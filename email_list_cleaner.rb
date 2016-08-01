@@ -37,20 +37,20 @@ class EmailListCleaner
   end
 
   # If proxy_addresses defined in proxylist.csv or config.yml, this provides
-  # random proxy in that list to Net::SMTP"s method that fetches a
+  # random proxy in that list to Net::SMTPs method that fetches a
   # TCPConnection.
   def random_proxy
-    return nil unless @proxy_list.length > 0
+    return nil unless num_proxies > 0
     return @proxy_list.sample
   end
-
+  # Similarly, this provides round-robin proxy access
   def next_proxy
-    return nil unless @proxy_list.length > 0
+    return nil unless num_proxies > 0
     return @proxy_list[next_proxy_counter]
   end
   def next_proxy_counter
     @next_proxy_counter ||= 0
-    max = @proxy_list.length-1
+    max = num_proxies-1
     if @next_proxy_counter >= max
       @next_proxy_counter = 0
     else
@@ -98,6 +98,10 @@ class EmailListCleaner
     end
   end
 
+  # Loops through all addresses and verifies.
+  # The 'meat' of this program.
+  #
+  # (Creates 1 thread per proxy for speed)
   def enum_and_verify
     puts "Verifying..."
     @pg = ProgressBar.create(
@@ -105,15 +109,26 @@ class EmailListCleaner
       format: PROGRESS_FORMAT,
       total: @r_named.scard(R_SET_TODO)
     )
+    @mutex = Mutex.new
+    threads = []
+    num_threads = num_proxies > 0 ? num_proxies : 1
+    (1..num_threads).each do |i|
+      threads << Thread.new { verify_until_done }
+    end
+    threads.each { |t| t.join }
+  rescue SystemExit, Interrupt
+    puts "Caught CTRL-C...stopping!"
+    Thread.list.each { |t| Thread.kill(t) }
+    return
+  end
+
+  def verify_until_done
     email = nil 
     while email = @r_named.spop(R_SET_TODO) do
       sleep @sleep_time
       verify_email(email)
       @pg.increment
     end
-  # For ctrl-c support
-  rescue SystemExit, Interrupt
-    return
   end
 
   def verify_email(email)
@@ -157,6 +172,10 @@ class EmailListCleaner
 
   def config_proxy_list
     @proxy_list = @config["proxy_addresses"] || []
+  end
+
+  def num_proxies
+    @proxy_list.length
   end
 
 end

@@ -6,8 +6,7 @@ from_email_address: ...
 # If you have a password set on your Redis installation
 # (AND YOU SHOULD), set it here to connect
 redis_password: ...
-# If you're not using proxy_servers I STRONGLY SUGGEST
-# setting this to a non-0 value
+# Don't hammer those poor mail servers! You will get banned.
 sleep_time: 1
 # List of SOCKS5 proxy addresses...
 #
