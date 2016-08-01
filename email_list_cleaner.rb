@@ -25,6 +25,7 @@ class EmailListCleaner
   # ruby-progressbar format
   # https://github.com/jfelchner/ruby-progressbar/wiki/Formatting
   PROGRESS_FORMAT = "%t [%c/%C] %w"
+  EXP_MICROSOFT = /.*\@(passport|hotmail|msn|live|outlook)\..*/i
 
   attr_reader :r_named, :config, :proxy_list, :pg
 
@@ -67,19 +68,31 @@ class EmailListCleaner
   end
 
   # CSV expected to have "Name", "Email address" in each row
-  def load_csv_into_redis_set
+  # Optionally filters only emails that match regexp
+  def load_csv_into_redis_set(regexp=nil)
     csv_arr = CSV.read("_list.csv")
     @pg = ProgressBar.create(
       title: "Load into Redis",
       format: PROGRESS_FORMAT,
       total: csv_arr.length
     )
+    # reset key
+    @r_named.del(R_SET_TODO)
     csv_arr.each do |row|
       email = row[1]
+
+      next unless email =~ regexp if regexp
+
       @r_named.sadd(R_SET_TODO, email)
       @pg.increment
     end
     return @r_named.scard(R_SET_TODO)
+  end
+
+  def reset_redis_sets
+    @r_named.del(R_SET_TODO)
+    @r_named.del(R_SET_GOOD)
+    @r_named.del(R_SET_BAD)
   end
 
   # Writes CSV files based on our current redis sets.
