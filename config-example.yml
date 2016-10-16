@@ -11,6 +11,7 @@ sleep_time: 1
 # List of SOCKS5 proxy addresses...
 #
 # Free ones that might be blacklisted available at: http://www.socks-proxy.net
+# Better yet, use https://github.com/subimage/cloud_proxy_generator
 #
 # Format below should be in "socks://[user:pass@]proxyhost[:port]"
 proxy_addresses:

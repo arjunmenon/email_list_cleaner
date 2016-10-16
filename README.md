@@ -1,28 +1,49 @@
-# EmailListCleaner 
+# Email List Cleaner 
 
-EmailListCleaner is a Ruby program that verifies large lists of email addresses stored in CSV files.
+Email List Cleaner is a Ruby program that verifies large lists of email addresses stored in a CSV file.
+
+It was used to clean and sort a list of 400k emails that were collected over the years by a friend of mine. Spread out across 50 proxies, the entire process took a few hours.
+
+A tool like this comes in handy when you need to send massive email campaigns — as many services such as SendGrid, MailChimp, and CampaignMonitor will penalize you for sending to addresses that bounce. Running Email List Cleaner will ensure you don't pay for sending to invalid addresses, or risk possible termination of your account with those email delivery providers.
+
+There are many commercial services that perform this function, but they're extremely expensive. Why pay for something you can do yourself with a little bit of automation?
 
 ## Requirements
 
 - Ruby 2.3.x
 - Redis Server
-- A publicly reachable IP (a shell account at co-location facility) — OR — SOCKS5 proxy servers
+- A publicly reachable IP (a shell account at co-location facility) — OR — SOCKS5 proxy servers (see below)
 - A CSV list of email addresses (_list.csv)
 
-This program was written to clean a large list of 400k or so addresses because I didn't feel like paying a service to do it, and it seemed like an interesting problem to tackle.
+## How It Works
 
-**How It Works**
-
-1. EmailListCleaner loads all addresses into a Redis Set, which removes duplicates.
+1. Email List Cleaner loads all addresses into a Redis Set, which removes duplicates.
 2. It then utilizes the [email_verifier gem](https://github.com/kamilc/email_verifier), which does a number of things, but ultimately connects to each SMTP server to verify using SMTP commands.
 3. Finally, it will dump CSV files of "good", "bad", and "todo" (if any remain)
 
-My list was in the format "name", "email" ...so the program expects your `_list.csv` to follow suit.
+## How To Install
 
-Check the `scripts` folder for easy to run examples. It's meant for consumption by Ruby devs that know what they're doing. "It worked on my machine", but you might run into issues.
+1. `git clone` to your computer
+2. `bundle install`
+
+## How To Use
+
+1. Copy config-example.yml to config.yml, read the comments & edit appropriately
+2. Provide a _list.csv of email addresses
+  - _My list was in the format "name", "email" ...so the program expects your `_list.csv` to follow suit._
+3. Check the `script` folder for easy to run examples. 
+  - This script is meant for consumption by Ruby devs that know what they're doing. "It worked on my machine", but you might run into issues. I encourage you to download it, give it a try, and send me a pull request to make it work in a broader range of situations.
+  - script/run.rb
+    - Starts a run of Email List Cleaner. You can savely cancel out of it (CTRL-C), and it will continue to run in the background.
+  - script/continue\_run.rb
+    - If the run of Email List Cleaner got interrupted for any reason, this will continue with the data available inside Redis.
+  - script/print\_stats.rb
+    - Dumps statistics of current run to the console.
+  - script/dump\_csv\_files.rb
+    - Saves CSV files to after a run has been completed. Will dump tmp/\_list\_bad.csv and tmp/\_list\_good.csv
 
 
-### VERY IMPORTANT - Read so you don't get your IPs blacklisted
+### !!! VERY IMPORTANT - Read so you don't get your IPs blacklisted
 
 Due to the nature of the check, some MX (mail) servers will ban or "blacklist" you from automating this process too quickly from one IP address. The Microsoft family of email addresses in particular (Hotmail.com, MSN.com, Live.com, Outlook.com, etc) are very sensitive to this tactic.
 
@@ -38,8 +59,9 @@ I'm unsure of the *EXACT* sleep_time parameter that's necessary - but if you tri
 
 My advice? Increase the "sleep\_time" parameter in the config.yml file (if you can wait), _or add "proxy\_servers" if you're checking a very large list._ 
 
-That said, I strongly suggest you use this with multiple proxy servers — as the program is written to thread requests across proxies so completion happens faster. There are lists of freely available proxies online if you Google, but I've also written another Ruby program that will spin up as many proxies as DigitalOcean will allow you to have droplets...
+*Using Proxy Servers*
 
+I strongly suggest you use this with multiple proxy servers — as the program is written to thread requests across proxies so completion happens faster. There are lists of freely available proxies online if you Google, but [I've also written another Ruby program that will spin up as many proxies as DigitalOcean will allow you to have droplets...](https://github.com/subimage/cloud_proxy_generator)
 
 ### Improvements
 
