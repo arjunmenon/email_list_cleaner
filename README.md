@@ -43,7 +43,12 @@ There are many commercial services that perform this function, but they're extre
     - Saves CSV files to after a run has been completed. Will dump tmp/\_list\_bad.csv and tmp/\_list\_good.csv
 
 
-### !!! VERY IMPORTANT - Read so you don't get your IPs blacklisted
+## Using Proxy Servers
+
+I strongly suggest you use this with multiple proxy servers — as the program is written to thread requests across proxies so completion happens faster. There are lists of freely available proxies online if you Google, but [I've also written another Ruby program that will spin up as many proxies as DigitalOcean will allow you to have droplets...](https://github.com/subimage/cloud_proxy_generator)
+
+
+## !!! VERY IMPORTANT - Read so you don't get your IPs blacklisted
 
 Due to the nature of the check, some MX (mail) servers will ban or "blacklist" you from automating this process too quickly from one IP address. The Microsoft family of email addresses in particular (Hotmail.com, MSN.com, Live.com, Outlook.com, etc) are very sensitive to this tactic.
 
@@ -59,10 +64,6 @@ I'm unsure of the *EXACT* sleep_time parameter that's necessary - but if you tri
 
 My advice? Increase the "sleep\_time" parameter in the config.yml file (if you can wait), _or add "proxy\_servers" if you're checking a very large list._ 
 
-### Using Proxy Servers
-
-I strongly suggest you use this with multiple proxy servers — as the program is written to thread requests across proxies so completion happens faster. There are lists of freely available proxies online if you Google, but [I've also written another Ruby program that will spin up as many proxies as DigitalOcean will allow you to have droplets...](https://github.com/subimage/cloud_proxy_generator)
-
-### Improvements
+## Future Improvements
 
 Due to the Hotmail mail server issue noted above, I've been thinking of other ways to verify those Microsoft accounts. One solution in particular involves using PhantomJs to make web requests to Microsoft login properties, who give the helpful message "there's no account that fits that description…". Maybe in the future.
