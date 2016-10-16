@@ -33,13 +33,13 @@ There are many commercial services that perform this function, but they're extre
   - _My list was in the format "name", "email" ...so the program expects your `_list.csv` to follow suit._
 3. Check the `script` folder for easy to run examples. 
   - This script is meant for consumption by Ruby devs that know what they're doing. "It worked on my machine", but you might run into issues. I encourage you to download it, give it a try, and send me a pull request to make it work in a broader range of situations.
-  - script/run.rb
+  - `script/run.rb`
     - Starts a run of Email List Cleaner. You can savely cancel out of it (CTRL-C), and it will continue to run in the background.
-  - script/continue\_run.rb
+  - `script/continue\_run.rb`
     - If the run of Email List Cleaner got interrupted for any reason, this will continue with the data available inside Redis.
-  - script/print\_stats.rb
+  - `script/print\_stats.rb`
     - Dumps statistics of current run to the console.
-  - script/dump\_csv\_files.rb
+  - `script/dump\_csv\_files.rb`
     - Saves CSV files to after a run has been completed. Will dump tmp/\_list\_bad.csv and tmp/\_list\_good.csv
 
 
@@ -59,7 +59,7 @@ I'm unsure of the *EXACT* sleep_time parameter that's necessary - but if you tri
 
 My advice? Increase the "sleep\_time" parameter in the config.yml file (if you can wait), _or add "proxy\_servers" if you're checking a very large list._ 
 
-*Using Proxy Servers*
+### Using Proxy Servers
 
 I strongly suggest you use this with multiple proxy servers — as the program is written to thread requests across proxies so completion happens faster. There are lists of freely available proxies online if you Google, but [I've also written another Ruby program that will spin up as many proxies as DigitalOcean will allow you to have droplets...](https://github.com/subimage/cloud_proxy_generator)
 
